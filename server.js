@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 import fs from 'fs';
-import dbPromise from './db.js';
+import db from './db.js';
 import 'dotenv/config';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -48,12 +48,11 @@ function eliminarArchivoLocal(imagenUrl) {
 app.post('/api/registro', async (req, res) => {
     const { nombre, email, password, rol } = req.body;
     try {
-        const db = await dbPromise;
         const hashedPassword = await bcrypt.hash(password, 10);
         const userRol = rol === 'comerciante' ? 'comerciante' : 'comprador';
         
-        await db.run(
-            'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
+        await db.query(
+            'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($1, $2, $3, $4)',
             [nombre, email, hashedPassword, userRol]
         );
         res.status(201).json({ mensaje: 'Usuario registrado exitosamente' });
@@ -65,10 +64,10 @@ app.post('/api/registro', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     try {
-        const db = await dbPromise;
-        const usuario = await db.get('SELECT * FROM usuarios WHERE email = ?', [email]);
-        if (!usuario) return res.status(401).json({ error: 'Credenciales incorrectas' });
+        const resultado = await db.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        if (resultado.rows.length === 0) return res.status(401).json({ error: 'Credenciales incorrectas' });
 
+        const usuario = resultado.rows[0];
         const passwordValida = await bcrypt.compare(password, usuario.password);
         if (!passwordValida) return res.status(401).json({ error: 'Credenciales incorrectas' });
 
@@ -82,9 +81,8 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/perfumes', async (req, res) => {
     try {
-        const db = await dbPromise;
-        const perfumes = await db.all('SELECT * FROM perfumes WHERE stock > 0 ORDER BY id DESC');
-        res.json(perfumes);
+        const resultado = await db.query('SELECT * FROM perfumes WHERE stock > 0 ORDER BY id DESC');
+        res.json(resultado.rows);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener el catálogo' });
     }
@@ -92,9 +90,8 @@ app.get('/api/perfumes', async (req, res) => {
 
 app.get('/api/perfumes/todos', async (req, res) => {
     try {
-        const db = await dbPromise;
-        const perfumes = await db.all('SELECT * FROM perfumes ORDER BY id DESC');
-        res.json(perfumes);
+        const resultado = await db.query('SELECT * FROM perfumes ORDER BY id DESC');
+        res.json(resultado.rows);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener inventario' });
     }
@@ -107,9 +104,8 @@ app.post('/api/perfumes', upload.single('imagen'), async (req, res) => {
     const imagen_url = req.file ? `/uploads/${req.file.filename}` : 'https://via.placeholder.com/400x400?text=Oudmelo';
 
     try {
-        const db = await dbPromise;
-        await db.run(
-            'INSERT INTO perfumes (nombre, marca, precio, stock, imagen_url, descripcion) VALUES (?, ?, ?, ?, ?, ?)',
+        await db.query(
+            'INSERT INTO perfumes (nombre, marca, precio, stock, imagen_url, descripcion) VALUES ($1, $2, $3, $4, $5, $6)',
             [nombre, marca, precio, stock, imagen_url, descripcion]
         );
         res.status(201).json({ mensaje: 'Perfume agregado al catálogo' });
@@ -124,18 +120,17 @@ app.put('/api/perfumes/:id', upload.single('imagen'), async (req, res) => {
     if (rol !== 'comerciante') return res.status(403).json({ error: 'Acceso denegado' });
 
     try {
-        const db = await dbPromise;
-        const perfumeActual = await db.get('SELECT imagen_url FROM perfumes WHERE id = ?', [id]);
-        if (!perfumeActual) return res.status(404).json({ error: 'Perfume no encontrado' });
+        const perfumeActual = await db.query('SELECT imagen_url FROM perfumes WHERE id = $1', [id]);
+        if (perfumeActual.rows.length === 0) return res.status(404).json({ error: 'Perfume no encontrado' });
 
-        let imagen_url = perfumeActual.imagen_url;
+        let imagen_url = perfumeActual.rows[0].imagen_url;
         if (req.file) {
             eliminarArchivoLocal(imagen_url);
             imagen_url = `/uploads/${req.file.filename}`;
         }
 
-        await db.run(
-            'UPDATE perfumes SET nombre = ?, marca = ?, precio = ?, stock = ?, imagen_url = ?, descripcion = ? WHERE id = ?',
+        await db.query(
+            'UPDATE perfumes SET nombre = $1, marca = $2, precio = $3, stock = $4, imagen_url = $5, descripcion = $6 WHERE id = $7',
             [nombre, marca, precio, stock, imagen_url, descripcion, id]
         );
         res.json({ mensaje: 'Producto actualizado correctamente' });
@@ -150,12 +145,11 @@ app.delete('/api/perfumes/:id', async (req, res) => {
     if (rol !== 'comerciante') return res.status(403).json({ error: 'Acceso denegado' });
 
     try {
-        const db = await dbPromise;
-        const perfume = await db.get('SELECT imagen_url FROM perfumes WHERE id = ?', [id]);
-        if (!perfume) return res.status(404).json({ error: 'Perfume no encontrado' });
+        const perfume = await db.query('SELECT imagen_url FROM perfumes WHERE id = $1', [id]);
+        if (perfume.rows.length === 0) return res.status(404).json({ error: 'Perfume no encontrado' });
 
-        eliminarArchivoLocal(perfume.imagen_url);
-        await db.run('DELETE FROM perfumes WHERE id = ?', [id]);
+        eliminarArchivoLocal(perfume.rows.url);
+        await db.query('DELETE FROM perfumes WHERE id = $1', [id]);
         res.json({ mensaje: 'Producto eliminado del catálogo' });
     } catch (error) {
         res.status(500).json({ error: 'No se pudo eliminar el producto' });
@@ -163,14 +157,13 @@ app.delete('/api/perfumes/:id', async (req, res) => {
 });
 
 app.post('/api/comprar', async (req, res) => {
-    const { usuario_id, carrito } = req.body;
+    const { usuario_id, carrito, total } = req.body;
     if (!usuario_id) return res.status(401).json({ error: 'Debes iniciar sesión' });
 
     try {
-        const db = await dbPromise;
-        await db.run('INSERT INTO pedidos (usuario_id) VALUES (?)', [usuario_id]);
+        await db.query('INSERT INTO pedidos (usuario_id, total) VALUES ($1, $2)', [usuario_id, total]);
         for (const item of carrito) {
-            await db.run('UPDATE perfumes SET stock = stock - ? WHERE id = ?', [item.cantidad, item.id]);
+            await db.query('UPDATE perfumes SET stock = stock - $1 WHERE id = $2', [item.cantidad, item.id]);
         }
         res.json({ mensaje: '¡Compra realizada con éxito!' });
     } catch (error) {

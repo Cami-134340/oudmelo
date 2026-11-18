@@ -1,45 +1,54 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+import pkg from 'pg';
+const { Pool } = pkg;
+import 'dotenv/config';
 
-// Abrir conexión con SQLite (crea el archivo database.sqlite automáticamente)
-const dbPromise = open({
-    filename: './database.sqlite',
-    driver: sqlite3.Database
+// Render o Neon proveen la URL en process.env.DATABASE_URL
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false // Requerido para conexiones seguras en la nube
+    }
 });
 
-// Inicializar las tablas si no existen
+// Inicializar tablas en PostgreSQL
 async function inicializarBD() {
-    const db = await dbPromise;
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            rol TEXT DEFAULT 'comprador',
-            creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                email VARCHAR(100) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                rol VARCHAR(50) DEFAULT 'comprador',
+                creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-        CREATE TABLE IF NOT EXISTS perfumes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            marca TEXT NOT NULL,
-            precio REAL NOT NULL,
-            stock INTEGER NOT NULL DEFAULT 0,
-            imagen_url TEXT,
-            descripcion TEXT
-        );
+            CREATE TABLE IF NOT EXISTS perfumes (
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                marca VARCHAR(100) NOT NULL,
+                precio DECIMAL(10, 2) NOT NULL,
+                stock INT NOT NULL DEFAULT 0,
+                imagen_url TEXT,
+                descripcion TEXT
+            );
 
-        CREATE TABLE IF NOT EXISTS pedidos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id INTEGER NOT NULL,
-            realizado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
-        );
-    `);
-    console.log('Base de datos SQLite inicializada correctamente.');
+            CREATE TABLE IF NOT EXISTS pedidos (
+                id SERIAL PRIMARY KEY,
+                usuario_id INT NOT NULL,
+                total DECIMAL(10, 2) NOT NULL,
+                realizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+            );
+        `);
+        console.log('Tablas de PostgreSQL inicializadas correctamente.');
+    } catch (error) {
+        console.error('Error al inicializar la base de datos:', error);
+    }
 }
 
 inicializarBD();
 
-export default dbPromise;
+export default {
+    query: (text, params) => pool.query(text, params)
+};
