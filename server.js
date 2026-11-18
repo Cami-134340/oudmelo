@@ -46,10 +46,10 @@ function eliminarArchivoLocal(imagenUrl) {
 // --- RUTAS DE AUTENTICACIÓN ---
 
 app.post('/api/registro', async (req, res) => {
-    const { nombre, email, password, rol } = req.body;
+    const { nombre, email, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const userRol = rol === 'comerciante' ? 'comerciante' : 'comprador';
+        const userRol = 'comprador';
         
         await db.query(
             'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($1, $2, $3, $4)',
@@ -106,7 +106,7 @@ app.post('/api/perfumes', upload.single('imagen'), async (req, res) => {
     try {
         await db.query(
             'INSERT INTO perfumes (nombre, marca, precio, stock, imagen_url, descripcion) VALUES ($1, $2, $3, $4, $5, $6)',
-            [nombre, marca, precio, stock, imagen_url, descripcion]
+            [nombre, marca, Number(precio), Number(stock), imagen_url, descripcion]
         );
         res.status(201).json({ mensaje: 'Perfume agregado al catálogo' });
     } catch (error) {
@@ -131,7 +131,7 @@ app.put('/api/perfumes/:id', upload.single('imagen'), async (req, res) => {
 
         await db.query(
             'UPDATE perfumes SET nombre = $1, marca = $2, precio = $3, stock = $4, imagen_url = $5, descripcion = $6 WHERE id = $7',
-            [nombre, marca, precio, stock, imagen_url, descripcion, id]
+            [nombre, marca, Number(precio), Number(stock), imagen_url, descripcion, id]
         );
         res.json({ mensaje: 'Producto actualizado correctamente' });
     } catch (error) {
@@ -148,7 +148,7 @@ app.delete('/api/perfumes/:id', async (req, res) => {
         const perfume = await db.query('SELECT imagen_url FROM perfumes WHERE id = $1', [id]);
         if (perfume.rows.length === 0) return res.status(404).json({ error: 'Perfume no encontrado' });
 
-        eliminarArchivoLocal(perfume.rows.url);
+        eliminarArchivoLocal(perfume.rows[0].imagen_url);
         await db.query('DELETE FROM perfumes WHERE id = $1', [id]);
         res.json({ mensaje: 'Producto eliminado del catálogo' });
     } catch (error) {

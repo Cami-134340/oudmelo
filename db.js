@@ -1,16 +1,15 @@
 import pkg from 'pg';
 const { Pool } = pkg;
+import bcrypt from 'bcrypt';
 import 'dotenv/config';
 
-// Render o Neon proveen la URL en process.env.DATABASE_URL
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false // Requerido para conexiones seguras en la nube
+        rejectUnauthorized: false
     }
 });
 
-// Inicializar tablas en PostgreSQL
 async function inicializarBD() {
     try {
         await pool.query(`
@@ -41,7 +40,20 @@ async function inicializarBD() {
                 FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
             );
         `);
-        console.log('Tablas de PostgreSQL inicializadas correctamente.');
+
+        const adminEmail = process.env.ADMIN_RESPALDO_EMAIL;
+        const adminPass = process.env.ADMIN_RESPALDO_PASS;
+
+        if (adminEmail && adminPass) {
+            const hashedPass = await bcrypt.hash(adminPass, 10);
+            await pool.query(`
+                INSERT INTO usuarios (nombre, email, password, rol)
+                VALUES ($1, $2, $3, 'comerciante')
+                ON CONFLICT (email) DO NOTHING;
+            `, ['Administrador Respaldo', adminEmail, hashedPass]);
+        }
+
+        console.log('Tablas de PostgreSQL y cuenta de respaldo inicializadas correctamente.');
     } catch (error) {
         console.error('Error al inicializar la base de datos:', error);
     }

@@ -12,7 +12,7 @@
 <body class="bg-[#F3F4F4] text-[#152134] dark:bg-[#1b2a42] dark:text-[#F3F4F4] min-h-screen flex flex-col transition-colors duration-300">
 
     <!-- Navbar -->
-    <header class="bg-white/90 dark:bg-[#152134]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-50">
+<header class="bg-white/90 dark:bg-[#152134]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <!-- Logo -->
             <a href="index.html" class="flex items-center gap-3 group">
@@ -23,7 +23,8 @@
                 </div>
             </a>
 
-            <nav class="flex items-center gap-5 text-sm font-medium">
+            <!-- NAVEGACIÓN DE ESCRITORIO (Intacta, se oculta en celular con 'hidden md:flex') -->
+            <nav class="hidden md:flex items-center gap-5 text-sm font-medium">
                 <a href="index.html" class="hover:opacity-75 transition"><i class="fa-solid fa-store mr-1"></i> Catálogo</a>
                 <a href="carrito.html" class="hover:opacity-75 transition relative">
                     <i class="fa-solid fa-cart-shopping mr-1"></i> Carrito
@@ -46,8 +47,147 @@
                     <button id="btn-logout" class="bg-rose-600 text-white px-3 py-1.5 rounded-xl hover:bg-rose-700 transition shadow-sm"><i class="fa-solid fa-power-off"></i></button>
                 </div>
             </nav>
+
+            <!-- CONTROLES MÓVILES (Carrito rápido + Botón Hamburguesa, solo visibles en celular con 'md:hidden') -->
+            <div class="flex items-center gap-3 md:hidden">
+                <a href="carrito.html" class="hover:opacity-75 transition relative p-2">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="badge-carrito-mobile" class="absolute top-0 right-0 bg-[#152134] text-[#F3F4F4] dark:bg-[#F3F4F4] dark:text-[#152134] text-[10px] px-1 py-0.2 rounded-full font-bold">0</span>
+                </a>
+                <button id="open-sidebar-btn" class="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 transition" aria-label="Abrir menú">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+            </div>
         </div>
     </header>
+
+    <!-- FONDO OSCURO TRASLÚCIDO PARA EL MENÚ MÓVIL -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-50 hidden md:hidden transition-opacity"></div>
+
+    <!-- BARRA LATERAL MÓVIL (Drawer) -->
+    <aside id="mobile-sidebar" class="fixed top-0 right-0 h-full w-72 bg-white dark:bg-[#152134] text-slate-900 dark:text-[#F3F4F4] z-50 transform translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col justify-between p-6 shadow-2xl border-l border-slate-200 dark:border-slate-800">
+      <div>
+        <!-- Cabecera de la barra lateral -->
+        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
+          <span class="text-sm font-black tracking-widest uppercase">Menú</span>
+          <button id="close-sidebar-btn" class="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Enlaces clonados para el celular -->
+        <nav class="flex flex-col gap-4 text-sm font-medium">
+            <a href="index.html" class="mobile-nav-link flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-store w-5"></i> Catálogo</a>
+            
+            <!-- Botón Modo Oscuro / Claro en móvil -->
+            <button id="btn-toggle-theme-mobile" class="w-full flex items-center gap-3 p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left">
+                <i class="fa-solid fa-moon dark:hidden w-5"></i>
+                <i class="fa-solid fa-sun hidden dark:inline w-5"></i>
+                <span>Cambiar tema</span>
+            </button>
+
+            <!-- Autenticación móvil (Duplica el comportamiento de #auth-links y #user-menu) -->
+            <div id="auth-links-mobile" class="flex flex-col gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <a href="login.html" class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-right-to-bracket w-5"></i> Ingresar</a>
+                <a href="registro.html" class="bg-[#152134] text-[#F3F4F4] dark:bg-[#F3F4F4] dark:text-[#152134] text-center px-4 py-2.5 rounded-xl font-semibold shadow-sm hover:opacity-90 transition">Registrarse</a>
+            </div>
+
+            <div id="user-menu-mobile" class="hidden flex-col gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <span id="user-nombre-mobile" class="font-semibold text-xs uppercase tracking-wider px-2"></span>
+                <a href="admin.html" id="link-admin-mobile" class="hidden flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i class="fa-solid fa-gauge w-5"></i> Panel</a>
+                <button id="btn-logout-mobile" class="flex items-center justify-center gap-2 bg-rose-600 text-white px-3 py-2 rounded-xl hover:bg-rose-700 transition shadow-sm w-full"><i class="fa-solid fa-power-off"></i> Cerrar Sesión</button>
+            </div>
+        </nav>
+      </div>
+
+      <div class="text-[10px] text-center uppercase tracking-widest text-[#5A5D62] dark:text-slate-400 font-bold pt-4 border-t border-slate-200 dark:border-slate-800">
+        Oudmelo • Alta Perfumería
+      </div>
+    </aside>
+
+    <!-- SCRIPT DE APERTURA Y SINCRONIZACIÓN MÓVIL -->
+    <script>
+      const openSidebarBtn = document.getElementById('open-sidebar-btn');
+      const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+      const mobileSidebar = document.getElementById('mobile-sidebar');
+      const sidebarOverlay = document.getElementById('sidebar-overlay');
+      const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+      function abrirSidebar() {
+        mobileSidebar.classList.remove('translate-x-full');
+        sidebarOverlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function cerrarSidebar() {
+        mobileSidebar.classList.add('translate-x-full');
+        sidebarOverlay.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      if (openSidebarBtn) openSidebarBtn.addEventListener('click', abrirSidebar);
+      if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', cerrarSidebar);
+      if (sidebarOverlay) sidebarOverlay.addEventListener('click', cerrarSidebar);
+
+      mobileNavLinks.forEach(link => {
+        link.addEventListener('click', cerrarSidebar);
+      });
+
+      // Sincronizar el cambio de tema móvil con el de escritorio (si usas un event listener global o disparas el click del original)
+      const btnThemeMobile = document.getElementById('btn-toggle-theme-mobile');
+      const btnThemeDesktop = document.getElementById('btn-toggle-theme');
+      if (btnThemeMobile && btnThemeDesktop) {
+          btnThemeMobile.addEventListener('click', () => {
+              btnThemeDesktop.click();
+          });
+      }
+
+      // Sincronizar contadores de carrito móvil
+      const badgeDesktop = document.getElementById('badge-carrito');
+      const badgeMobile = document.getElementById('badge-carrito-mobile');
+      if (badgeDesktop && badgeMobile) {
+          const observer = new MutationObserver(() => {
+              badgeMobile.textContent = badgeDesktop.textContent;
+          });
+          observer.observe(badgeDesktop, { childList: true, characterData: true, subtree: true });
+      }
+
+      // Sincronizar estado de usuario logueado en móvil con los elementos originales
+      const authLinksMobile = document.getElementById('auth-links-mobile');
+      const userMenuMobile = document.getElementById('user-menu-mobile');
+      const userNombreMobile = document.getElementById('user-nombre-mobile');
+      const linkAdminMobile = document.getElementById('link-admin-mobile');
+      const btnLogoutMobile = document.getElementById('btn-logout-mobile');
+
+      const authLinksDesktop = document.getElementById('auth-links');
+      const userMenuDesktop = document.getElementById('user-menu');
+
+      if (authLinksDesktop && userMenuDesktop) {
+          const observerAuth = new MutationObserver(() => {
+              if (userMenuDesktop.classList.contains('flex')) {
+                  authLinksMobile.classList.add('hidden');
+                  userMenuMobile.classList.remove('hidden');
+                  userMenuMobile.classList.add('flex');
+                  userNombreMobile.textContent = document.getElementById('user-nombre').textContent;
+                  if (!document.getElementById('link-admin').classList.contains('hidden')) {
+                      linkAdminMobile.classList.remove('hidden');
+                      linkAdminMobile.classList.add('flex');
+                  }
+              } else {
+                  authLinksMobile.classList.remove('hidden');
+                  userMenuMobile.classList.add('hidden');
+              }
+          });
+          observerAuth.observe(userMenuDesktop, { attributes: true, attributeFilter: ['class'] });
+
+          // Si el usuario hace clic en logout en el celular, activa el logout original
+          if (btnLogoutMobile) {
+              btnLogoutMobile.addEventListener('click', () => {
+                  document.getElementById('btn-logout').click();
+              });
+          }
+      }
+    </script>
 
 <!-- Contenido Principal -->
     <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
