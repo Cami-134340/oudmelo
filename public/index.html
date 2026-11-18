@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oudmelo - Alta Perfumería</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-[#F3F4F4] text-[#152134] dark:bg-[#1b2a42] dark:text-[#F3F4F4] min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Navbar -->
+    <header class="bg-white/90 dark:bg-[#152134]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center gap-3 group">
+                <img src="/img/oudmelologo.jpeg" alt="Logo Oudmelo" class="h-10 w-10 rounded-xl object-cover border border-slate-300 dark:border-slate-700 shadow-sm group-hover:scale-105 transition">
+                <div class="flex flex-col">
+                    <span class="text-xl font-black tracking-widest uppercase leading-none">Oud<span class="font-light text-[#5A5D62] dark:text-slate-400">melo</span></span>
+                    <span class="text-[9px] uppercase tracking-widest text-[#5A5D62] dark:text-slate-400 font-bold">Alta Perfumería</span>
+                </div>
+            </a>
+
+            <nav class="flex items-center gap-5 text-sm font-medium">
+                <a href="index.html" class="hover:opacity-75 transition"><i class="fa-solid fa-store mr-1"></i> Catálogo</a>
+                <a href="carrito.html" class="hover:opacity-75 transition relative">
+                    <i class="fa-solid fa-cart-shopping mr-1"></i> Carrito
+                    <span id="badge-carrito" class="absolute -top-2 -right-3 bg-[#152134] text-[#F3F4F4] dark:bg-[#F3F4F4] dark:text-[#152134] text-xs px-1.5 py-0.5 rounded-full font-bold">0</span>
+                </a>
+                
+                <!-- Botón Modo Oscuro / Claro -->
+                <button id="btn-toggle-theme" class="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 transition" title="Cambiar tema">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline"></i>
+                </button>
+
+                <div id="auth-links" class="flex items-center gap-3">
+                    <a href="login.html" class="hover:opacity-75 transition"><i class="fa-solid fa-right-to-bracket mr-1"></i> Ingresar</a>
+                    <a href="registro.html" class="bg-[#152134] text-[#F3F4F4] dark:bg-[#F3F4F4] dark:text-[#152134] px-4 py-2 rounded-xl font-semibold shadow-sm hover:opacity-90 transition">Registrarse</a>
+                </div>
+                <div id="user-menu" class="hidden items-center gap-4">
+                    <span id="user-nombre" class="font-semibold text-xs uppercase tracking-wider"></span>
+                    <a href="admin.html" id="link-admin" class="hidden hover:opacity-75 transition"><i class="fa-solid fa-gauge mr-1"></i> Panel</a>
+                    <button id="btn-logout" class="bg-rose-600 text-white px-3 py-1.5 rounded-xl hover:bg-rose-700 transition shadow-sm"><i class="fa-solid fa-power-off"></i></button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+<!-- Contenido Principal -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- CARRUSEL DESTACADO -->
+        <section id="carrusel-container" class="relative w-full h-[380px] sm:h-[460px] rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 mb-12 group hidden">
+            <!-- Slides inyectados por JS -->
+            <div id="carrusel-slides" class="w-full h-full relative"></div>
+
+            <!-- Botón Anterior -->
+            <button id="btn-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#152134]/60 hover:bg-[#152134] text-[#F3F4F4] backdrop-blur-md border border-slate-600/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 z-20 cursor-pointer">
+                <i class="fa-solid fa-chevron-left text-sm"></i>
+            </button>
+
+            <!-- Botón Siguiente -->
+            <button id="btn-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#152134]/60 hover:bg-[#152134] text-[#F3F4F4] backdrop-blur-md border border-slate-600/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 z-20 cursor-pointer">
+                <i class="fa-solid fa-chevron-right text-sm"></i>
+            </button>
+
+            <!-- Indicadores inferiores (puntitos) -->
+            <div id="carrusel-indicadores" class="absolute bottom-5 right-6 flex items-center gap-2 z-20"></div>
+        </section>
+
+        <!-- Título del Catálogo -->
+        <div class="mb-10 text-center md:text-left">
+            <h2 class="text-4xl font-black tracking-wide">Colección Exclusiva</h2>
+            <p class="text-[#5A5D62] dark:text-slate-400 text-xs mt-1 uppercase tracking-widest font-semibold">Esencias de alta gama adaptadas para ti</p>
+        </div>
+
+        <div id="catalogo" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Inyectado por app.js -->
+        </div>
+    </main>
+
+    <!-- Footer con Redes Sociales y Contacto -->
+    <footer class="bg-white dark:bg-[#152134] border-t border-slate-200 dark:border-slate-800 text-[#5A5D62] dark:text-slate-400 py-8 px-4 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs tracking-wider uppercase">
+            <p>&copy; 2026 Oudmelo. Todos los derechos reservados.</p>
+            
+            <div class="flex items-center gap-6">
+                <!-- Mail de contacto -->
+                <a href="mailto:oudmelo1@gmail.com" class="hover:text-[#152134] dark:hover:text-white transition flex items-center gap-2">
+                    <i class="fa-solid fa-envelope text-sm"></i> contacto oudmelo1@gmail.com
+                </a>
+                
+                <!-- Instagram Link con Hover e Ícono -->
+                <a href="https://www.instagram.com/oud.melo" target="_blank" rel="noopener noreferrer" class="hover:text-pink-500 dark:hover:text-pink-400 transition flex items-center gap-2 group">
+                    <span class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:scale-110 group-hover:bg-pink-500 group-hover:text-white transition">
+                        <i class="fa-brands fa-instagram text-base"></i>
+                    </span>
+                    <span class="font-bold">@oudmelo</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+<!-- Modal de Vista Ampliada del Producto -->
+    <div id="modal-producto" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div id="modal-contenido" class="bg-white dark:bg-[#152134] border border-slate-300 dark:border-slate-700 rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-2 relative">
+            
+            <!-- Botón Cerrar -->
+            <button onclick="cerrarModalProducto()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 text-white hover:bg-black/80 flex items-center justify-center transition z-10 cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Imagen Ampliada -->
+            <div class="bg-slate-100 dark:bg-slate-950 h-72 md:h-full">
+                <img id="modal-img" src="" alt="" class="w-full h-full object-cover">
+            </div>
+
+            <!-- Información Extendida -->
+            <div class="p-6 sm:p-8 flex flex-col justify-between">
+                <div>
+                    <span id="modal-marca" class="text-xs font-extrabold uppercase tracking-[0.25em] text-[#5A5D62] dark:text-slate-400 block mb-1"></span>
+                    <h3 id="modal-nombre" class="text-2xl sm:text-3xl font-black mb-4 leading-tight"></h3>
+                    
+                    <div class="border-t border-b border-slate-200 dark:border-slate-800 py-4 my-4 max-h-48 overflow-y-auto">
+                        <p class="text-[11px] uppercase tracking-wider font-bold text-[#5A5D62] dark:text-slate-400 mb-1">Notas y Descripción</p>
+                        <p id="modal-desc" class="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span id="modal-precio" class="text-2xl font-black"></span>
+                        <span id="modal-stock" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 text-[#5A5D62] dark:text-slate-300"></span>
+                    </div>
+                    <button id="modal-btn-agregar" class="w-full bg-[#152134] text-[#F3F4F4] dark:bg-[#F3F4F4] dark:text-[#152134] py-3 rounded-xl font-bold hover:opacity-90 transition flex items-center justify-center gap-2 text-xs shadow-md uppercase tracking-wider">
+                        <i class="fa-solid fa-cart-plus"></i> Añadir al Carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

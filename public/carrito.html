@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu Carrito - Oudmelo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-[#F3F4F4] text-[#152134] dark:bg-[#152134] dark:text-[#F3F4F4] min-h-screen flex flex-col transition-colors duration-300">
+
+    <header class="bg-white/90 dark:bg-[#152134]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <img src="/img/oudmelologo.jpeg" alt="Logo Oudmelo" class="h-10 w-10 rounded-xl object-cover border border-slate-300 dark:border-slate-700 shadow-sm group-hover:scale-105 transition">
+                <span class="text-xl font-black tracking-widest uppercase">Oud<span class="font-light text-[#5A5D62] dark:text-slate-400">melo</span></span>
+            </a>
+            <div class="flex items-center gap-4">
+                <button id="btn-toggle-theme" class="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 transition" title="Cambiar tema">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline"></i>
+                </button>
+                <a href="index.html" class="text-sm font-medium hover:opacity-75 transition"><i class="fa-solid fa-arrow-left mr-1"></i> Seguir Comprando</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-10 flex-grow w-full">
+        <h2 class="text-3xl font-extrabold mb-6 flex items-center gap-3">
+            <i class="fa-solid fa-cart-shopping"></i> Carrito de Compras
+        </h2>
+
+        <div class="bg-white dark:bg-slate-900/60 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6">
+            <div id="lista-carrito" class="divide-y divide-slate-100 dark:divide-slate-800">
+                <!-- Items cargados por app.js -->
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                <div class="text-xl font-bold">
+                    Total: $<span id="total-carrito">0.00</span>
+                </div>
+                <button id="btn-finalizar-compra" class="bg-[#152134] text-[#F3F4F4] dark:bg-[#F3F4F4] dark:text-[#152134] px-6 py-3 rounded-xl font-bold hover:opacity-90 transition shadow-sm tracking-wide">
+                    <i class="fa-solid fa-check mr-2"></i> Finalizar Compra
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
